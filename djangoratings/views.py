@@ -7,7 +7,7 @@ from django.conf import settings
 from default_settings import RATINGS_VOTES_PER_IP
 
 class AddRatingView(object):
-    def __call__(self, request, content_type_id, object_id, field_name, score):
+    def __call__(self, request, content_type_id, object_id, field_name):
         """__call__(request, content_type_id, object_id, field_name, score)
         
         Adds a vote to the specified model field."""
@@ -24,7 +24,9 @@ class AddRatingView(object):
             field = getattr(instance, field_name)
         except AttributeError:
             return self.invalid_field_response(request, context)
-        
+
+        score = request.POST['score']
+
         context.update({
             'field': field,
             'score': score,
@@ -92,8 +94,8 @@ class AddRatingView(object):
 
 
 class AddRatingFromModel(AddRatingView):
-    def __call__(self, request, model, app_label, object_id, field_name, score):
-        """__call__(request, model, app_label, object_id, field_name, score)
+    def __call__(self, request, model, app_label, object_id, field_name):
+        """__call__(request, model, app_label, object_id, field_name)
         
         Adds a vote to the specified model field."""
         try:
@@ -102,4 +104,4 @@ class AddRatingFromModel(AddRatingView):
             raise Http404('Invalid `model` or `app_label`.')
         
         return super(AddRatingFromModel, self).__call__(request, content_type.id,
-                                                        object_id, field_name, score)
+                                                        object_id, field_name)
