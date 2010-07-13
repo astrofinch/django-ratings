@@ -99,7 +99,7 @@ The best way to use the generic views is by extending it, or calling it within y
 	from djangoratings.views import AddRatingFromModel
 	
 	urlpatterns = patterns('',
-	    url(r'rate-my-post/(?P<object_id>\d+)/(?P<score>\d+)/', AddRatingFromModel(), {
+	    url(r'rate-my-post/(?P<object_id>\d+)/', AddRatingFromModel(), {
 	        'app_label': 'blogs',
 	        'model': 'post',
 	        'field_name': 'rating',
@@ -115,13 +115,15 @@ Another example, on Nibbits we use a basic API interface, and we simply call the
 	    'content_type_id': 23,
 	    'object_id': 34,
 	    'field_name': 'ratings', # this should match the field name defined in your model
-	    'score': 1, # the score value they're sending
 	}
 	response = AddRatingView()(request, **params)
+	# note that there should be a 'score' entry in request.POST,
+	# for the score they're sending
 	if response.status_code == 200:
 	    if response.content == 'Vote recorded.':
 	        request.user.add_xp(settings.XP_BONUSES['submit-rating'])
-	    return {'message': response.content, 'score': params['score']}
+	    return {'message': response.content,
+	        'score': request.POST['score']}
 	return {'error': 9, 'message': response.content}
 
 ==========================
