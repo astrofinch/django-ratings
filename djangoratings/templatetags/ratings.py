@@ -87,3 +87,16 @@ def do_rating_by_user(parser, token):
         raise template.TemplateSyntaxError("fourth argument to '%s' tag must be 'as'" % bits[0])
     return RatingByUserNode(bits[1], bits[3], bits[5])
 register.tag('rating_by_user', do_rating_by_user)
+
+@register.simple_tag
+def generate_options(ratemanager, request):
+    attributes = [None]
+    attributes.extend(['value="%d"' % i for i in
+        range(1, ratemanager.field.range + 1)])
+    user_score = int(ratemanager.get_rating_for_user(request.user))
+    if user_score:
+        attributes[user_score] += ' selected="selected"'
+    lines = ['<option %s>1 star</option>' % attributes[1]]
+    lines.extend(['<option %s>%d stars</option>' % (attributes[i], i)
+        for i in range(2, ratemanager.field.range + 1)])
+    return '\n'.join(lines)
